@@ -1,2 +1,3 @@
-# osmium
-A neural network-based Othello bot
+# Osmium
+
+A neural network-based Othello bot.
