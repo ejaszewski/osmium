@@ -1,6 +1,9 @@
-use std::{cmp::PartialOrd, marker::PhantomData};
+use std::marker::PhantomData;
 
-use num_traits::{clamp_min, identities::Zero};
+use nalgebra::SVector;
+use num_traits::Zero;
+
+use crate::TensorItem;
 
 pub struct ReLU<T, const N: usize> {
     phantom: PhantomData<T>,
@@ -8,13 +11,10 @@ pub struct ReLU<T, const N: usize> {
 
 impl<T, const N: usize> ReLU<T, N>
 where
-    T: Copy + Zero + PartialOrd,
+    T: TensorItem,
 {
-    pub fn forward(&self, x: [T; N]) -> [T; N] {
-        let mut y = x;
-        y.iter_mut()
-            .for_each(|yi| *yi = clamp_min(*yi, Zero::zero()));
-        y
+    pub fn forward(&self, x: SVector<T, N>) -> SVector<T, N> {
+        x.sup(&SVector::<T, N>::zero())
     }
 }
 

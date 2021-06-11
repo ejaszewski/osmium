@@ -9,3 +9,11 @@ edition = "2018"
 [dependencies]
 num-traits = "0.2"
 rand = "0.8.0"
+nalgebra = "0.27.1"
+
+[dev-dependencies]
+criterion = { version = "0.3.4", features = ["html_reports"] }
+
+[[bench]]
+name = "dense"
+harness = false
