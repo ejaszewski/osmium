@@ -1,5 +1,7 @@
 pub mod activations;
 pub mod layers;
+pub mod losses;
+pub mod optimizers;
 
 use nalgebra::{ClosedAdd, ClosedMul, Scalar, SimdPartialOrd, SimdValue};
 use num_traits::{One, Zero};
