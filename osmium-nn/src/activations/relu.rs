@@ -1,33 +1,39 @@
 use std::marker::PhantomData;
 
 use nalgebra::SVector;
-use num_traits::Zero;
+use num_traits::{One, Zero};
 
-use crate::TensorItem;
+use crate::{Module, TensorItem};
 
-pub struct ReLU<T, const N: usize> {
+pub struct ReLU<T, const M: usize> {
     phantom: PhantomData<T>,
 }
 
-impl<T, const N: usize> ReLU<T, N>
+impl<T, const M: usize> Module for ReLU<T, M>
 where
     T: TensorItem,
 {
-    pub fn forward(&self, x: SVector<T, N>) -> SVector<T, N> {
-        x.sup(&SVector::<T, N>::zero())
+    type In = SVector<T, M>;
+
+    type Out = SVector<T, M>;
+
+    type Gradient = ();
+
+    fn forward(&self, x: Self::In) -> Self::Out {
+        x.sup(&SVector::<T, M>::zero())
     }
-}
 
-impl<const N: usize> ReLU<f32, N> {
-    pub fn grad(&self, x: [f32; N], in_grad: [f32; N]) -> [f32; N] {
-        // Initialize to last input
-        let mut grad = x;
+    fn backward(&self, x: Self::In, dldy: Self::Out) -> (Self::In, Self::Gradient) {
+        let positive = x.map(|x| {
+            if x > Zero::zero() {
+                One::one()
+            } else {
+                Zero::zero()
+            }
+        });
 
-        // Compute gradient from last input
-        grad.iter_mut()
-            .zip(in_grad.iter())
-            .for_each(|(o, g)| *o = if *o > 0.0 { *g } else { 0.0 });
-
-        grad
+        (dldy.component_mul(&positive), ())
     }
+
+    fn update(&mut self, _step: Self::Gradient) {}
 }

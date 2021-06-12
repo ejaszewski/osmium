@@ -5,7 +5,7 @@ use rand::{
     prelude::*,
 };
 
-use crate::TensorItem;
+use crate::{Module, TensorItem};
 
 #[derive(Clone)]
 pub struct Linear<T, const M: usize, const N: usize> {
@@ -13,28 +13,30 @@ pub struct Linear<T, const M: usize, const N: usize> {
     pub(crate) bias: SVector<T, N>,
 }
 
-impl<T, const M: usize, const N: usize> Linear<T, M, N>
+impl<T, const M: usize, const N: usize> Module for Linear<T, M, N>
 where
     T: TensorItem,
 {
-    pub fn forward(&self, x: SVector<T, M>) -> SVector<T, N> {
+    type In = SVector<T, M>;
+
+    type Out = SVector<T, N>;
+
+    type Gradient = (SMatrix<T, M, N>, SVector<T, N>);
+
+    fn forward(&self, x: Self::In) -> Self::Out {
         self.weights.transpose() * x + self.bias
     }
 
-    pub fn grad(
-        &self,
-        x: SVector<T, M>,
-        in_grad: SVector<T, N>,
-    ) -> (SMatrix<T, M, N>, SVector<T, M>) {
-        let grad = self.weights * in_grad;
-        let wgrad = x * in_grad.transpose();
+    fn backward(&self, x: Self::In, dldy: Self::Out) -> (Self::In, Self::Gradient) {
+        let dldx = self.weights * dldy;
+        let dldw = x * dldy.transpose();
 
-        (wgrad, grad)
+        (dldx, (dldw, dldy))
     }
 
-    pub fn update(&mut self, dw: SMatrix<T, M, N>, db: SVector<T, N>) {
-        self.weights += dw;
-        self.bias += db;
+    fn update(&mut self, step: Self::Gradient) {
+        self.weights += step.0;
+        self.bias += step.1;
     }
 }
 

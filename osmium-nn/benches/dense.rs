@@ -2,6 +2,7 @@ use criterion::*;
 
 use nalgebra::SVector;
 use num_traits::Zero;
+use osmium_nn::Module;
 use osmium_nn::layers::Linear;
 
 fn dense_16(c: &mut Criterion) {
