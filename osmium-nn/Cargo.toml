@@ -14,6 +14,12 @@ nalgebra = "0.27.1"
 [dev-dependencies]
 criterion = { version = "0.3.4", features = ["html_reports"] }
 
+[profile.release]
+lto = "thin"
+
+[profile.bench]
+lto = "thin"
+
 [[bench]]
 name = "dense"
 harness = false
